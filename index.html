@@ -340,11 +340,6 @@
                 currentScore += roll;
                 updateDisplay();
                 
-                // Show danger warning if score is getting high
-                if (currentScore > 50) {
-                    document.getElementById('dangerWarning').style.display = 'block';
-                }
-                
                 // Continue auto rolling if active
                 if (autoRolling) {
                     setTimeout(rollDie, 150); // Small delay for animation
