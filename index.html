@@ -262,6 +262,7 @@
 
         <div class="controls">
             <button class="btn" id="rollBtn" onclick="rollDie()">🎲 Roll Die</button>
+            <button class="btn" id="autoRollBtn" onclick="autoRoll()">⚡ Auto Roll</button>
         </div>
 
         <div id="gameOverMessage" class="game-over" style="display: none;">
@@ -290,6 +291,7 @@
         let diceRolled = [];
         let gameActive = true;
         let highScores = [];
+        let autoRolling = false;
 
         // Load high scores from memory
         function loadHighScores() {
@@ -336,6 +338,7 @@
             
             // Update score and display
             if (roll === 1) {
+                autoRolling = false;
                 gameOver();
             } else {
                 currentScore += roll;
@@ -345,14 +348,42 @@
                 if (currentScore > 50) {
                     document.getElementById('dangerWarning').style.display = 'block';
                 }
+                
+                // Continue auto rolling if active
+                if (autoRolling) {
+                    setTimeout(rollDie, 150); // Small delay for animation
+                }
             }
+        }
+
+        function autoRoll() {
+            if (!gameActive) return;
+            
+            if (!autoRolling) {
+                // Start auto rolling
+                autoRolling = true;
+                document.getElementById('autoRollBtn').textContent = '⏹️ Stop';
+                document.getElementById('rollBtn').disabled = true;
+                rollDie();
+            } else {
+                // Stop auto rolling
+                stopAutoRoll();
+            }
+        }
+
+        function stopAutoRoll() {
+            autoRolling = false;
+            document.getElementById('autoRollBtn').textContent = '⚡ Auto Roll';
+            document.getElementById('rollBtn').disabled = false;
         }
 
         function gameOver() {
             gameActive = false;
+            autoRolling = false;
             
             document.getElementById('gameOverMessage').style.display = 'block';
             document.getElementById('rollBtn').style.display = 'none';
+            document.getElementById('autoRollBtn').style.display = 'none';
             document.getElementById('newGameContainer').style.display = 'block';
             document.getElementById('dangerWarning').style.display = 'none';
             
@@ -370,12 +401,16 @@
             currentScore = 0;
             diceRolled = [];
             gameActive = true;
+            autoRolling = false;
             
             document.getElementById('diceContainer').innerHTML = '<p style="color: #666; font-size: 1.2em;">Click "Roll Die" to start your adventure!</p>';
             document.getElementById('gameOverMessage').style.display = 'none';
             document.getElementById('newHighScoreMessage').style.display = 'none';
             document.getElementById('dangerWarning').style.display = 'none';
             document.getElementById('rollBtn').style.display = 'inline-block';
+            document.getElementById('rollBtn').disabled = false;
+            document.getElementById('autoRollBtn').style.display = 'inline-block';
+            document.getElementById('autoRollBtn').textContent = '⚡ Auto Roll';
             document.getElementById('newGameContainer').style.display = 'none';
             
             updateDisplay();
