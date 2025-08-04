@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D20 Dice Roller Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .game-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .score-section {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            gap: 20px;
+        }
+
+        .score-box {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            flex: 1;
+            border: 2px solid #e9ecef;
+        }
+
+        .score-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .score-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .dice-container {
+            margin: 30px 0;
+            min-height: 150px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .die {
+            width: 80px;
+            height: 80px;
+            background: #fff;
+            border: 3px solid #333;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            animation: rollIn 0.6s ease-out;
+        }
+
+        .die.critical-fail {
+            background: #ff4757;
+            color: white;
+            border-color: #ff3742;
+            animation: shake 0.5s ease-in-out;
+        }
+
+        .die.natural-20 {
+            background: #2ed573;
+            color: white;
+            border-color: #1dd1a1;
+            animation: glow 0.8s ease-out;
+        }
+
+        @keyframes rollIn {
+            0% {
+                transform: rotate(0deg) scale(0.5);
+                opacity: 0;
+            }
+            50% {
+                transform: rotate(180deg) scale(1.1);
+            }
+            100% {
+                transform: rotate(360deg) scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1); }
+            50% { box-shadow: 0 0 30px rgba(46, 213, 115, 0.8); }
+        }
+
+        .controls {
+            margin: 30px 0;
+        }
+
+        .btn {
+            background: #5f27cd;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            border-radius: 50px;
+            cursor: pointer;
+            margin: 0 10px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn:hover {
+            background: #341f97;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(95, 39, 205, 0.3);
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .game-over {
+            background: #ff4757;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 1.3em;
+        }
+
+        .new-high-score {
+            background: #2ed573;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 1.3em;
+            animation: celebration 1s ease-out;
+        }
+
+        @keyframes celebration {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .high-scores {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+        }
+
+        .high-scores h3 {
+            color: #333;
+            margin-bottom: 15px;
+        }
+
+        .high-score-list {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .high-score-item {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 8px;
+            min-width: 80px;
+        }
+
+        .warning {
+            color: #ff4757;
+            font-weight: bold;
+            margin: 15px 0;
+            font-size: 1.1em;
+        }
+
+        @media (max-width: 600px) {
+            .game-container {
+                padding: 20px;
+            }
+            
+            .score-section {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .die {
+                width: 60px;
+                height: 60px;
+                font-size: 1.5em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>🎲 D20 Dice Roller</h1>
+        <p class="subtitle">Roll to build your score, but beware - a 1 ends your game!</p>
+        
+        <div class="score-section">
+            <div class="score-box">
+                <div class="score-label">Current Score</div>
+                <div class="score-value" id="currentScore">0</div>
+            </div>
+            <div class="score-box">
+                <div class="score-label">High Score</div>
+                <div class="score-value" id="highScore">0</div>
+            </div>
+            <div class="score-box">
+                <div class="score-label">Total Dice</div>
+                <div class="score-value" id="diceCount">0</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <button class="btn" id="rollBtn" onclick="rollDie()">🎲 Roll Die</button>
+        </div>
+
+        <div id="gameOverMessage" class="game-over" style="display: none;">
+            💀 Game Over! You rolled a 1 and died!
+        </div>
+
+        <div id="newHighScoreMessage" class="new-high-score" style="display: none;">
+            🎉 New High Score! Congratulations!
+        </div>
+
+        <div class="warning" id="dangerWarning" style="display: none;">
+            ⚠️ You're living dangerously! One wrong roll and it's over!
+        </div>
+
+        <div class="dice-container" id="diceContainer">
+            <p style="color: #666; font-size: 1.2em;">Click "Roll Die" to start your adventure!</p>
+        </div>
+
+        <div class="controls" id="newGameContainer" style="display: none;">
+            <button class="btn" id="newGameBtn" onclick="newGame()">🔄 New Game</button>
+        </div>
+    </div>
+
+    <script>
+        let currentScore = 0;
+        let diceRolled = [];
+        let gameActive = true;
+        let highScores = [];
+
+        // Load high scores from memory
+        function loadHighScores() {
+            // In a real implementation, you'd use localStorage here
+            // For this demo, we'll use a simple variable for the single high score
+            highScores = [0]; // Just track the single high score
+            updateHighScoreDisplay();
+        }
+
+        function saveHighScores() {
+            // In a real implementation, you'd save to localStorage here
+            // localStorage.setItem('d20HighScores', JSON.stringify(highScores));
+        }
+
+        function updateHighScoreDisplay() {
+            const highScoreElement = document.getElementById('highScore');
+            highScoreElement.textContent = highScores[0] || 0;
+        }
+
+        function rollDie() {
+            if (!gameActive) return;
+
+            const roll = Math.floor(Math.random() * 20) + 1;
+            diceRolled.push(roll);
+            
+            // Create die element
+            const diceContainer = document.getElementById('diceContainer');
+            if (diceRolled.length === 1) {
+                diceContainer.innerHTML = ''; // Clear initial message
+            }
+            
+            const die = document.createElement('div');
+            die.className = 'die';
+            die.textContent = roll;
+            
+            // Add special styling for critical results
+            if (roll === 1) {
+                die.classList.add('critical-fail');
+            } else if (roll === 20) {
+                die.classList.add('natural-20');
+            }
+            
+            diceContainer.appendChild(die);
+            
+            // Update score and display
+            if (roll === 1) {
+                gameOver();
+            } else {
+                currentScore += roll;
+                updateDisplay();
+                
+                // Show danger warning if score is getting high
+                if (currentScore > 50) {
+                    document.getElementById('dangerWarning').style.display = 'block';
+                }
+            }
+        }
+
+        function gameOver() {
+            gameActive = false;
+            
+            document.getElementById('gameOverMessage').style.display = 'block';
+            document.getElementById('rollBtn').style.display = 'none';
+            document.getElementById('newGameContainer').style.display = 'block';
+            document.getElementById('dangerWarning').style.display = 'none';
+            
+            // Check for high score
+            if (currentScore > highScores[0]) {
+                // New high score!
+                document.getElementById('newHighScoreMessage').style.display = 'block';
+                highScores[0] = currentScore;
+                saveHighScores();
+                updateHighScoreDisplay();
+            }
+        }
+
+        function newGame() {
+            currentScore = 0;
+            diceRolled = [];
+            gameActive = true;
+            
+            document.getElementById('diceContainer').innerHTML = '<p style="color: #666; font-size: 1.2em;">Click "Roll Die" to start your adventure!</p>';
+            document.getElementById('gameOverMessage').style.display = 'none';
+            document.getElementById('newHighScoreMessage').style.display = 'none';
+            document.getElementById('dangerWarning').style.display = 'none';
+            document.getElementById('rollBtn').style.display = 'inline-block';
+            document.getElementById('newGameContainer').style.display = 'none';
+            
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            document.getElementById('currentScore').textContent = currentScore;
+            document.getElementById('diceCount').textContent = diceRolled.length;
+        }
+
+        // Initialize the game
+        loadHighScores();
+        updateDisplay();
+    </script>
+</body>
+</html>
